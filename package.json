@@ -28,8 +28,8 @@
         "coverage": "yarn hardhat coverage",
         "ci:clean": "rm -rf ./artifacts ./cache .;types",
         "test": "yarn hardhat test",
-        "deployTest": "yarn hardhat deploy --network polygonTestnet",
-        "deployMain": "yarn hardhat deploy --network polygon"
+        "deployTest": "yarn hardhat deploy --network bscTestnet",
+        "deployMain": "yarn hardhat deploy --network bsc"
     },
     "dependencies": {
     }

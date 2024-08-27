@@ -1,6 +1,5 @@
-const { expect, assert } = require("chai")
-const { BigNumber } = require("ethers")
-const { parseEther, formatEther } = require("ethers/lib/utils")
+const { expect } = require("chai")
+const { formatEther } = require("ethers/lib/utils")
 const { ethers } = require("hardhat")
 
 describe("TreasureHunt", function () {
@@ -34,20 +33,20 @@ describe("TreasureHunt", function () {
     it("Should allow players to move", async function () {
         await treasureHunt.connect(player1).joinGame({ value: ethers.utils.parseEther("0.01") })
         const initialPosition = await treasureHunt.getPlayerPosition(player1.address)
-        await treasureHunt.connect(player1).move(0) // Move down
-        await treasureHunt.connect(player1).move(0) // Move down
+        await treasureHunt.connect(player1).move(0) // Move up
+        await treasureHunt.connect(player1).move(0) // Move up
         await treasureHunt.connect(player1).move(1) // Move down
         await treasureHunt.connect(player1).move(1) // Move down
         await treasureHunt.connect(player1).move(1) // Move down
-        await treasureHunt.connect(player1).move(2) // Move down
-        await treasureHunt.connect(player1).move(2) // Move down
-        await treasureHunt.connect(player1).move(2) // Move down
-        await treasureHunt.connect(player1).move(2) // Move down
-        await treasureHunt.connect(player1).move(3) // Move down
-        await treasureHunt.connect(player1).move(3) // Move down
-        await treasureHunt.connect(player1).move(3) // Move down
-        await treasureHunt.connect(player1).move(3) // Move down
-        await treasureHunt.connect(player1).move(3) // Move down
+        await treasureHunt.connect(player1).move(2) // Move left
+        await treasureHunt.connect(player1).move(2) // Move left
+        await treasureHunt.connect(player1).move(2) // Move left
+        await treasureHunt.connect(player1).move(2) // Move left
+        await treasureHunt.connect(player1).move(3) // Move right
+        await treasureHunt.connect(player1).move(3) // Move right
+        await treasureHunt.connect(player1).move(3) // Move right
+        await treasureHunt.connect(player1).move(3) // Move right
+        await treasureHunt.connect(player1).move(3) // Move right
         const newPosition = await treasureHunt.getPlayerPosition(player1.address)
         expect(newPosition).to.not.equal(initialPosition)
     })
@@ -60,35 +59,30 @@ describe("TreasureHunt", function () {
         // Keep moving until we land on a multiple of 5
         let playerPosition
         let prevPosition = -1
-        console.log(Number(playerPosition))
-        console.log(Number(prevPosition))
+        let treasurePosition
+
         while (
             Number(playerPosition) % 5 !== 0 &&
             Number(await treasureHunt.getPlayerPosition(player1.address)) != 100
         ) {
-            await treasureHunt.connect(player1).move(move) // Move down
+            await treasureHunt.connect(player1).move(move) // Move random
             playerPosition = await treasureHunt.getPlayerPosition(player1.address)
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
 
             if (Number(prevPosition) == Number(playerPosition)) {
-                console.log("same")
-                // move = (move + 1) % 3
                 move = parseInt(Math.random() * 3)
-                console.log(move)
                 await treasureHunt.connect(player1).move(move)
                 playerPosition = await treasureHunt.getPlayerPosition(player1.address)
             }
-            console.log(move)
             prevPosition = playerPosition
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
+            treasurePosition = await treasureHunt.getTreasurePosition()
+            console.log(`Player Move: ${move}`)
+            console.log(`Treasure Position: ${Number(treasurePosition)}`)
+            console.log(`Player Position: ${Number(playerPosition)}`)
         }
 
-        const newTreasurePosition = await treasureHunt.getTreasurePosition()
+        treasurePosition = await treasureHunt.getTreasurePosition()
         if (Number(await treasureHunt.getPlayerPosition(player1.address)) != 100) {
-            console.log(Number(await treasureHunt.getPlayerPosition(player1.address)) != 100)
-            expect(newTreasurePosition).to.not.equal(initialTreasurePosition)
+            expect(treasurePosition).to.not.equal(initialTreasurePosition)
         }
     })
 
@@ -96,37 +90,32 @@ describe("TreasureHunt", function () {
         await treasureHunt.connect(player1).joinGame({ value: ethers.utils.parseEther("0.01") })
         const initialTreasurePosition = await treasureHunt.getTreasurePosition()
         let move = parseInt(Math.random() * 3)
+        let treasurePosition
 
         // Keep moving until we land on a prime number
         let playerPosition = -1
         let prevPosition = -2
-        console.log(Number(playerPosition))
-        console.log(Number(prevPosition))
+
         while (
             !isPrime(Number(playerPosition)) &&
             Number(await treasureHunt.getPlayerPosition(player1.address)) != 100
         ) {
-            await treasureHunt.connect(player1).move(move) // Move down
+            await treasureHunt.connect(player1).move(move) // Move random
             playerPosition = await treasureHunt.getPlayerPosition(player1.address)
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
             if (Number(prevPosition) == Number(playerPosition)) {
-                console.log("same")
-                // move = (move + 1) % 3
                 move = parseInt(Math.random() * 3)
-                console.log(move)
                 await treasureHunt.connect(player1).move(move)
                 playerPosition = await treasureHunt.getPlayerPosition(player1.address)
             }
             prevPosition = playerPosition
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
+            treasurePosition = await treasureHunt.getTreasurePosition()
+            console.log(`Player Move: ${move}`)
+            console.log(`Treasure Position: ${Number(treasurePosition)}`)
+            console.log(`Player Position: ${Number(playerPosition)}`)
         }
 
-        const newTreasurePosition = await treasureHunt.getTreasurePosition()
         if (Number(await treasureHunt.getPlayerPosition(player1.address)) != 100) {
-            console.log(Number(await treasureHunt.getPlayerPosition(player1.address)) != 100)
-            expect(newTreasurePosition).to.not.equal(initialTreasurePosition)
+            expect(treasurePosition).to.not.equal(initialTreasurePosition)
         }
     })
 
@@ -137,51 +126,38 @@ describe("TreasureHunt", function () {
 
         const initialBalance = await player1.getBalance()
 
-        // Keep moving player1 until they win
-        // let player1Position
-        // do {
-        //     await treasureHunt.connect(player1).move(1) // Move down
-        //     player1Position = await treasureHunt.getPlayerPosition(player1.address)
-        // } while (player1Position !== (await treasureHunt.getTreasurePosition()))
-
         let move = parseInt(Math.random() * 3)
 
-        // Keep moving until we land on a prime number
+        let treasurePosition
+
         let playerPosition = -1
         let prevPosition = -2
-        console.log(Number(playerPosition))
-        console.log(Number(prevPosition))
+
         while (Number(await treasureHunt.getPlayerPosition(player1.address)) != 100) {
-            console.log("no issue")
             await treasureHunt.connect(player1).move(move) // Move down
-            console.log("issue")
             playerPosition = await treasureHunt.getPlayerPosition(player1.address)
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
+
             if (Number(prevPosition) == Number(playerPosition)) {
-                console.log("same")
-                // move = (move + 1) % 3
                 move = parseInt(Math.random() * 3)
-                console.log(move)
                 await treasureHunt.connect(player1).move(move)
                 if (Number(await treasureHunt.getPlayerPosition(player1.address)) == 100) {
-                    console.log(
-                        Number(await treasureHunt.getPlayerPosition(player1.address)) != 100
-                    )
+                    console.log(`Game Ended`)
                     expect(await treasureHunt.getPlayerPosition(player1.address)).to.be.equal(
                         BigInt(100)
                     )
                 }
-                // playerPosition = await treasureHunt.getPlayerPosition(player1.address)
             }
             prevPosition = playerPosition
-            console.log(Number(playerPosition))
-            console.log(Number(prevPosition))
+
+            treasurePosition = await treasureHunt.getTreasurePosition()
+            console.log(`Player Move: ${move}`)
+            console.log(`Treasure Position: ${Number(treasurePosition)}`)
+            console.log(`Player Position: ${Number(playerPosition)}`)
         }
 
         const finalBalance = await player1.getBalance()
-        console.log(formatEther(initialBalance))
-        console.log(formatEther(finalBalance))
+        console.log(`Player's Initial Balance: ${formatEther(initialBalance)}`)
+        console.log(`Player's Final Balance: ${formatEther(finalBalance)}`)
         expect(initialBalance).to.be.lt(finalBalance)
 
         // Check if the game has been reset

@@ -77,8 +77,8 @@ module.exports = {
         },
         bsc: {
             url: BSC_RPC_URL,
-            // accounts: [PRIVATE_KEY, PRIVATE_KEY_2],
-            accounts: { mnemonic: MNEMONIC },
+            accounts: [PRIVATE_KEY, PRIVATE_KEY_2],
+            // accounts: { mnemonic: MNEMONIC },
             chainId: 56,
             allowUnlimitedContractSize: true,
         },

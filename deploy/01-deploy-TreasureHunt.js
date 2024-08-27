@@ -21,7 +21,7 @@ const deployerTreasureHunt = async function (hre) {
         waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
     })
     log(`TreasureHunt at ${TreasureHunt.address}`)
-    if (!developmentChains.includes(network.name) && process.env.POLYGONSCAN_API_KEY) {
+    if (!developmentChains.includes(network.name) && process.env.BSCSCAN_API_KEY) {
         await verify(TreasureHunt.address, args, "contracts/TreasureHunt.sol:TreasureHunt")
     }
 
